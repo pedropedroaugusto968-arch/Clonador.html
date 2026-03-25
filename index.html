@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIREHEX SCRIPT EXTRACTOR</title>
+    <style>
+        body { background-color: #0d0d0d; color: #a020f0; font-family: 'Courier New', monospace; padding: 20px; text-align: center; }
+        .box { background: #1a1a1a; padding: 20px; border: 2px solid #a020f0; border-radius: 10px; max-width: 800px; margin: auto; }
+        input { width: 90%; padding: 10px; margin: 10px 0; background: #000; border: 1px solid #a020f0; color: #0f0; }
+        button { background: #a020f0; color: #fff; padding: 15px 30px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        textarea { width: 100%; height: 400px; margin-top: 20px; background: #000; color: #0f0; border: 1px solid #444; font-size: 12px; display: none; }
+        #log { color: yellow; margin: 10px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h1>ꜰɪʀᴇʜᴇx ᴇxᴛʀᴀᴄᴛᴏʀ</h1>
+    <input type="text" id="url" placeholder="https://site-alvo.com">
+    <input type="text" id="antigo" placeholder="Texto para trocar">
+    <input type="text" id="novo" placeholder="Novo texto">
+    <br>
+    <button onclick="pegarScript()">EXTRAIR SCRIPT AGORA</button>
+    <div id="log"></div>
+    <textarea id="resultado"></textarea>
+</div>
+
+<script>
+    async function pegarScript() {
+        const urlAlvo = document.getElementById('url').value;
+        const txtAntigo = document.getElementById('antigo').value;
+        const txtNovo = document.getElementById('novo').value;
+        const log = document.getElementById('log');
+        const area = document.getElementById('resultado');
+
+        if(!urlAlvo) return alert("Cadê o link?");
+
+        log.innerText = "🌀 Invadindo e puxando código...";
+        
+        try {
+            // Usando o Proxy para conseguir ler o código de sites protegidos
+            const proxy = "https://api.allorigins.win/get?url=";
+            const response = await fetch(proxy + encodeURIComponent(urlAlvo));
+            const data = await response.json();
+            let scriptPuro = data.contents;
+
+            // Faz a modificação que você pediu no código
+            log.innerText = "🛠️ Modificando scripts internos...";
+            let scriptModificado = scriptPuro.split(txtAntigo).join(txtNovo);
+
+            // Exibe o código na tela
+            area.value = scriptModificado;
+            area.style.display = "block";
+            log.innerText = "✅ SCRIPT EXTRAÍDO COM SUCESSO! COPIE ABAIXO:";
+            
+        } catch (e) {
+            log.innerText = "❌ ERRO: O site bloqueou a extração.";
+        }
+    }
+</script>
+
+</body>
+</html>
