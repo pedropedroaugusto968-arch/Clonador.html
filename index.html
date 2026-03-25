@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIREHEX SCRIPT GENERATOR</title>
+    <style>
+        body { background-color: #0d0d0d; color: #a020f0; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .container { background: #1a1a1a; padding: 30px; border-radius: 15px; border: 2px solid #a020f0; box-shadow: 0 0 20px #a020f0; width: 100%; max-width: 700px; text-align: center; }
+        h1 { font-size: 22px; margin-bottom: 20px; color: #fff; text-transform: uppercase; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #a020f0; background: #000; color: #00ff00; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #a020f0; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; }
+        button:hover { background: #7b1fa2; box-shadow: 0 0 15px #fff; }
+        #output-container { margin-top: 20px; display: none; text-align: left; }
+        textarea { width: 100%; height: 300px; background: #000; color: #00ff00; border: 1px solid #444; padding: 10px; border-radius: 5px; font-size: 12px; resize: none; }
+        .label-code { color: #fff; font-size: 14px; margin-bottom: 5px; display: block; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>ꜰɪʀᴇʜᴇx ᴄᴏᴅᴇ ɪɴᴊᴇᴄᴛᴏʀ</h1>
+    
+    <input type="text" id="urlAlvo" placeholder="Cole o link do site aqui">
+    <input type="text" id="termoAntigo" placeholder="Texto original (ex: R$ 100)">
+    <input type="text" id="termoNovo" placeholder="Novo texto (ex: R$ 0,00)">
+    
+    <button onclick="gerarScript()">EXTRAIR E MODIFICAR SCRIPT</button>
+
+    <div id="output-container">
+        <span class="label-code">💻 SCRIPT GERADO (PRONTO PARA COPIAR):</span>
+        <textarea id="resultadoCodigo" readonly></textarea>
+        <button onclick="copiarCodigo()" style="background: #00ff00; color: #000;">COPIAR SCRIPT</button>
+    </div>
+</div>
+
+<script>
+    async function gerarScript() {
+        const url = document.getElementById('urlAlvo').value;
+        const antigo = document.getElementById('termoAntigo').value;
+        const novo = document.getElementById('termoNovo').value;
+        const outputContainer = document.getElementById('output-container');
+        const areaCodigo = document.getElementById('resultadoCodigo');
+
+        if(!url || !antigo || !novo) {
+            alert("Preencha todos os campos!");
+            return;
+        }
+
+        try {
+            // Puxa o código do site
+            const proxy = "https://api.allorigins.win/get?url=";
+            const res = await fetch(proxy + encodeURIComponent(url));
+            const data = await res.json();
+            let htmlOriginal = data.contents;
+
+            // Modifica o texto no código
+            let htmlModificado = htmlOriginal.split(antigo).join(novo);
+
+            // Adiciona uma marca da FireHex no código gerado
+            const assinatura = "\n\n";
+            
+            areaCodigo.value = htmlModificado + assinatura;
+            outputContainer.style.display = 'block';
+            
+            alert("✅ Script extraído com sucesso!");
+        } catch (e) {
+            alert("Erro ao extrair script do site. Verifique o link.");
+        }
+    }
+
+    function copiarCodigo() {
+        const copyText = document.getElementById("resultadoCodigo");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+        alert("Script copiado para a área de transferência!");
+    }
+</script>
+
+</body>
+</html>
