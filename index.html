@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIREHEX OMNI-EXTRACTOR v6</title>
+    <style>
+        body { background: #000; color: #a020f0; font-family: 'Courier New', monospace; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .panel { background: #111; border: 2px solid #a020f0; padding: 25px; border-radius: 15px; width: 100%; max-width: 600px; box-shadow: 0 0 30px rgba(160, 32, 240, 0.3); text-align: center; }
+        input { width: 100%; padding: 12px; margin: 8px 0; background: #000; border: 1px solid #444; color: #0f0; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #a020f0; color: #fff; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; text-transform: uppercase; }
+        .btn-copy { background: #00ff88; color: #000; display: none; }
+        textarea { width: 100%; height: 300px; margin-top: 20px; background: #050505; color: #0f0; border: 1px solid #a020f0; padding: 10px; font-size: 11px; display: none; }
+        #log { margin-top: 10px; font-size: 12px; color: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="panel">
+    <h1>ꜰɪʀᴇʜᴇx ᴇxᴛʀᴀᴄᴛᴏʀ ᴠ6</h1>
+    <input type="text" id="url" placeholder="Link do site (ex: https://site.app)">
+    <input type="text" id="find" placeholder="Texto para remover">
+    <input type="text" id="replace" placeholder="Texto para colocar">
+    
+    <button onclick="executar()">EXECUTAR EXTRAÇÃO TOTAL</button>
+    <button id="btnCopy" class="btn-copy" onclick="copiar()">📋 COPIAR SCRIPT</button>
+    
+    <div id="log">Aguardando alvo...</div>
+    <textarea id="output" readonly></textarea>
+</div>
+
+<script>
+    async function executar() {
+        let target = document.getElementById('url').value;
+        const find = document.getElementById('find').value;
+        const replace = document.getElementById('replace').value;
+        const log = document.getElementById('log');
+        const output = document.getElementById('output');
+        const btn = document.getElementById('btnCopy');
+
+        if(!target) return alert("Insira o link!");
+        if(!target.startsWith('http')) target = 'https://' + target;
+
+        log.innerHTML = "🌀 [FIREHEX] Quebrando firewall e puxando dados...";
+        output.style.display = "none";
+        btn.style.display = "none";
+
+        try {
+            // Proxy com timestamp para evitar cache do código antigo
+            const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(target)}&cb=${Date.now()}`);
+            const data = await res.json();
+            let raw = data.contents;
+
+            if(!raw) {
+                log.innerHTML = "❌ Site protegido. Tente outro link ou use HTTPS.";
+                return;
+            }
+
+            const base = new URL(target).origin;
+            // Injeta a tag base para não dar tela preta
+            let final = raw.replace('<head>', `<head><base href="${base}/">`);
+
+            if(find && replace) {
+                final = final.split(find).join(replace);
+            }
+
+            output.value = final;
+            output.style.display = "block";
+            btn.style.display = "block";
+            log.innerHTML = "✅ SCRIPT EXTRAÍDO COM SUCESSO!";
+
+        } catch (e) {
+            log.innerHTML = "❌ Erro fatal de conexão.";
+        }
+    }
+
+    function copiar() {
+        const out = document.getElementById('output');
+        out.select();
+        document.execCommand("copy");
+        alert("✅ Script copiado!");
+    }
+</script>
+</body>
+</html>
